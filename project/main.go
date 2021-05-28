@@ -5,37 +5,44 @@ import ("fmt"
         "math"
 		)
 
-func main() {
-     var a,b,c,d float64
-	 	 a=vvod("a")
-		 b=vvod("b")
-		 c=vvod("c")
-		 d=calcdiscr(a,b,c)
-	 	 fmt.Println("\n")
-		 calcroot(a,b,d)
-		}
-
-
-func vvod(pole string) float64 {
+type uravnen struct {
+    a,b,c,d float64 
+    }
+	
+func (ur1 *uravnen) vvod() {
     var x float64
-	fmt.Println(" Please input ",pole,"="  )
-	 fmt.Scanf("%v \n", &x)
-	 return x
-}
+	fmt.Println(" Please input a="  )
+	fmt.Scanf("%v \n", &x)
+    (*ur1).a=x
+	fmt.Println(" Please input b="  )
+	fmt.Scanf("%v \n", &x)
+    (*ur1).b=x
+	fmt.Println(" Please input c="  )
+	fmt.Scanf("%v \n", &x)
+    (*ur1).c=x
+	}
 
-func calcdiscr(a,b,c float64) float64 {
+func (ur1 *uravnen) calcdiscr() {
     var x float64
-	x=b*b-4*a*c
-	 return x
-}
+	x=(*ur1).b*(*ur1).b-4*(*ur1).a*(*ur1).c
+	(*ur1).d=x
+	}
 
-func calcroot(a,b,d float64)  {
-    if d>0 {
-	   fmt.Println("root № 1=", (-1*b-math.Pow(d,0.5))/(2*a))
-	   fmt.Println("root № 2=", (-1*b+math.Pow(d,0.5))/(2*a))
-	 }else if d==0 {
-	   fmt.Println("root =", (-1*b-math.Pow(d,0.5))/(2*a))
-	 }else if d<0 {
+func (ur1 *uravnen) calcroot() {
+    if (*ur1).d>0 {
+	   fmt.Println("root № 1=", (-1*(*ur1).b-math.Pow((*ur1).d,0.5))/(2*(*ur1).a))
+	   fmt.Println("root № 2=", (-1*(*ur1).b+math.Pow((*ur1).d,0.5))/(2*(*ur1).a))
+	 }else if (*ur1).d==0 {
+	   fmt.Println("root =", (-1*(*ur1).b-math.Pow((*ur1).d,0.5))/(2*(*ur1).a))
+	 }else if (*ur1).d<0 {
 	   fmt.Println("There are not any roots ")
 	 }
 	}
+		
+func main() {
+     uobj:= uravnen{}
+	 uobj.vvod()
+	 uobj.calcdiscr()
+	 uobj.calcroot()
+	}
+
