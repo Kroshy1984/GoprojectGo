@@ -4,7 +4,7 @@ package main
 import ("fmt" 
         "math"
 		)
-
+// test
 type uravnen struct {
     a,b,c,d float64 
     }
