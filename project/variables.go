@@ -13,4 +13,6 @@ func main() {
 	//var i int=8
 	i := 9
 	fmt.Println(i)
+	var x1 bool
+	fmt.Println(x1)
 }
