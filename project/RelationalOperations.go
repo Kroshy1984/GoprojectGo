@@ -9,4 +9,7 @@ func main() {
 	fmt.Println(x!=y)
 	fmt.Println(x>y)
 	fmt.Println(x<y)
+	fmt.Println(x!=y && x<=y) // AND
+	fmt.Println(x!=y || x<=y) // OR
+	fmt.Println(!(x>y))
 }
