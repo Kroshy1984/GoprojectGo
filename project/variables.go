@@ -10,6 +10,7 @@ func main() {
 	var z string
 	z=" ссыкуха"
 	fmt.Println(y+z)
-	var i int=8
+	//var i int=8
+	i := 9
 	fmt.Println(i)
 }
