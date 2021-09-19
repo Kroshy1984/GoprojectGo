@@ -4,22 +4,31 @@ package main
 import ("fmt" 
         "math"
 		)
-
+// main function
 func main() {
      var a,b,c,d float64
-	 	 a=vvod("a")
-		 b=vvod("b")
-		 c=vvod("c")
+	 	 a=input("a")
+		 b=input("b")
+		 c=input("c")
 		 d=calcdiscr(a,b,c)
 	 	 fmt.Println("\n")
 		 calcroot(a,b,d)
 		}
 
-
-func vvod(pole string) float64 {
+// 
+func input(variable string) float64 {
     var x float64
-	fmt.Println(" Please input ",pole,"="  )
-	 fmt.Scanf("%v \n", &x)
+	fmt.Println(" Please input ",variable,"="  )
+	fmt.Scanf("%v \n", &x)
+	switch v := variable.(type) { 
+    default:
+        fmt.Printf("Well done! It is realy", v)
+    case uint64:
+        fmt.Printf("unexpected type %T", v)
+    case string:
+        fmt.Printf("unexpected type %T", v)
+    } 
+	 
 	 return x
 }
 
