@@ -6,4 +6,7 @@ func main() {
 	x:=42
 	y:=8
 	fmt.Println(x==y)
+	fmt.Println(x!=y)
+	fmt.Println(x>y)
+	fmt.Println(x<y)
 }
