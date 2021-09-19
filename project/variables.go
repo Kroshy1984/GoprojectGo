@@ -3,6 +3,7 @@ package main
 import "fmt"
 
 func main() {
+	const pi = 3.14
     var x string = "Hello World"
     fmt.Println(x)
 	var y string
@@ -15,4 +16,5 @@ func main() {
 	fmt.Println(i)
 	var x1 bool
 	fmt.Println(x1)
+	fmt.Println(pi)
 }
