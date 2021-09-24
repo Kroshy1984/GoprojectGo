@@ -15,7 +15,7 @@ type student struct {
 }
 
 func insertIntoDB(n string, c int, g int) {
-	db, err := sql.Open("sqlite3", ".\\Database\\test.db")
+	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
 		panic(err)
 	}
@@ -28,16 +28,20 @@ func insertIntoDB(n string, c int, g int) {
 	fmt.Println(result.RowsAffected()) // количество добавленных строк
 }
 
-func main() {
-
-	fmt.Println("let's GO")
-	db, err := sql.Open("sqlite3", ".\\Database\\test.db")
+func checkConnection(dbPATH string) {
+	db, err := sql.Open("sqlite3", dbPATH)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+}
 
-	insertIntoDB("Name3", 4, 7)
+func selectFromDB(dbPATH string) {
+	db, err := sql.Open("sqlite3", "test.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
 	rows, err := db.Query("select * from Student")
 	if err != nil {
@@ -58,4 +62,13 @@ func main() {
 	for _, st := range students {
 		fmt.Println(st.id, st.name, st.course, st.group_num)
 	}
+}
+
+func main() {
+
+	checkConnection("test.db")
+
+	//insertIntoDB("Name3", 4, 7)
+
+	selectFromDB("test.db")
 }
