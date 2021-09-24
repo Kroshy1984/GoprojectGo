@@ -14,7 +14,7 @@ func main() {
 		panic(err)
 	}
 	defer db.Close()
-	result, err := db.Exec("insert into persons (first_name, last_name) values ($1, $2)",
+	result, err := db.Exec("insert into Persons (first_name, last_name) values ($1, $2)",
 		"Dmitry", "Chernikov")
 	if err != nil {
 		panic(err)
