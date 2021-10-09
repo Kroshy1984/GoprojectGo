@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -40,8 +42,15 @@ type person struct {
 
 // Select all Person objects from DB
 // Returns an array of Person
-func SelectAllPersons() []person {
-	rows, err := db.Query("select * from Persons")
+func SelectAllPersons(dbPath string, query string) ([]person, error) {
+
+	if strings.Contains(query, "drop") || strings.Contains(query, "delete") {
+		return []person{}, errors.New("cannot execute query")
+	}
+
+	InitDB(dbPath)
+
+	rows, err := db.Query(query)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +66,7 @@ func SelectAllPersons() []person {
 		}
 		persons = append(persons, p)
 	}
-	return persons
+	return persons, nil
 }
 
 // Select specified Person by id
@@ -100,26 +109,15 @@ func PrintPersons(persons []person) {
 }
 
 func main() {
-	dataSourceName := ".\\DataBase\\test.db"
+	dataSourceName := "test.db"
 	InitDB(dataSourceName)
-	id, err := AddPerson("Danil", "Komarov")
-	if err != nil {
-		panic(err)
+
+	query := "select * from Persons"
+	// query := "drop table"
+	persons, error := SelectAllPersons(dataSourceName, query)
+	if error != nil {
+		fmt.Println(error)
+		return
 	}
-	fmt.Println("Added new Person: ")
-	PrintPersons([]person{SelectPersonById(id)})
-	fmt.Println("==========")
-	PrintPersons(SelectAllPersons())
-	count, err := UpdatePersonById(id, "Mikhail", "Dirin")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Print("Updated ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
-	count, err = DeletePersonById(id)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Print("Deleted ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
+	PrintPersons(persons)
 }
