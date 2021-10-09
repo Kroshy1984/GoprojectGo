@@ -23,9 +23,9 @@ func InitDB(dataSourceName string) error {
 // Adds Product by first and last name
 // Returns pair <object_id, error>
 
-func AddProduct(product string, expiration_date string) (int64, error) {
-	result, err := db.Exec("insert into Products (product, expiration_date) values ($1, $2)",
-		product, expiration_date)
+func AddProduct(id int, product string, expiration_date string) (int64, error) {
+	result, err := db.Exec("insert into Products (id, product, expiration_date) values ($1, $2, $3)",
+		id, product, expiration_date)
 	if err != nil {
 		panic(err)
 	}
@@ -101,9 +101,10 @@ func PrintProducts(products []product) {
 }
 
 func main() {
-	dataSourceName := ".\\DataBase\\test.db"
+	dataSourceName := "test.db"
 	InitDB(dataSourceName)
-	id, err := AddProduct("Water", "2022-10-12")
+
+	id, err := AddProduct(6, "Water", "2022-10-12")
 	if err != nil {
 		panic(err)
 	}
@@ -117,10 +118,5 @@ func main() {
 	}
 	fmt.Print("Updated ", count, " rows\n")
 	PrintProducts(SelectAllProducts())
-	count, err = DeleteProductById(id)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Print("Deleted ", count, " rows\n")
-	PrintProducts(SelectAllProducts())
+
 }
