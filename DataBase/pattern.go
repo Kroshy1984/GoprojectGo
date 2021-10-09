@@ -20,106 +20,120 @@ func InitDB(dataSourceName string) error {
 	return db.Ping()
 }
 
-// Adds Person by first and last name
+// car struct
+type car struct {
+	id           int
+	manufacturer string
+	model        string
+	product_year int
+}
+
+// Adds Car by all needed info
 // Returns pair <object_id, error>
-func AddPerson(firstName string, lastName string) (int64, error) {
-	result, err := db.Exec("insert into Persons (first_name, last_name) values ($1, $2)",
-		firstName, lastName)
+func AddCar(id int64, manufacturer string, model string, product_year int64) (int64, error) {
+	result, err := db.Exec("insert into CARS (id, manufacturer, model, production_year) values ($1, $2, $3, $4)",
+		id, manufacturer, model, product_year)
 	if err != nil {
 		panic(err)
 	}
 	return result.LastInsertId()
 }
 
-// Describes Person object
-type person struct {
-	id         int
-	first_name string
-	last_name  string
-}
-
-// Select all Person objects from DB
-// Returns an array of Person
-func SelectAllPersons() []person {
-	rows, err := db.Query("select * from Persons")
+// Select all Car objects from DB
+// Returns an array of Car
+func SelectAllCars() []car {
+	rows, err := db.Query("select * from CARS")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
-	persons := []person{}
-	// Parse rows into a Persons
+	cars := []car{}
+	// Parse rows into a Cars
 	for rows.Next() {
-		p := person{}
-		err := rows.Scan(&p.id, &p.first_name, &p.last_name)
+		c := car{}
+		err := rows.Scan(&c.id, &c.manufacturer, &c.model, &c.product_year)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		persons = append(persons, p)
+		cars = append(cars, c)
 	}
-	return persons
+	return cars
 }
 
-// Select specified Person by id
-// Returns an Person object
-func SelectPersonById(id int64) person {
-	row := db.QueryRow("select * from Persons where id = $1", id)
-	p := person{}
-	err := row.Scan(&p.id, &p.first_name, &p.last_name)
+// Select specified Car by id
+// Returns an Car object
+func SelectCarById(id int64) car {
+	row := db.QueryRow("select * from CARS where id = $1", id)
+	c := car{}
+	err := row.Scan(&c.id, &c.manufacturer, &c.model, &c.product_year)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return p
+	return c
 }
 
-// Updates Person with your id first and last name
+// Updates Car with input data
 // Returns pair <count of updated rows, error>
-func UpdatePersonById(id int64, first_name string, last_name string) (int64, error) {
-	result, err := db.Exec("update Persons set first_name = $1, last_name = $2 where id = $3", first_name, last_name, id)
+func UpdateCarById(id int64, manufacturer string, model string, product_year int) (int64, error) {
+	result, err := db.Exec("update CARS set manufacturer = $1, model = $2, production_year = $3 where id = $4", manufacturer, model, product_year, id)
 	if err != nil {
 		panic(err)
 	}
 	return result.RowsAffected()
 }
 
-// Deletes Person by selected id
+// Deletes Car by id
 // Returns pair <count of deleted rows, error>
-func DeletePersonById(id int64) (int64, error) {
-	result, err := db.Exec("delete from Persons where id = $1", id)
+func DeleteCarById(id int64) (int64, error) {
+	result, err := db.Exec("delete from CARS where id = $1", id)
 	if err != nil {
 		panic(err)
 	}
 	return result.RowsAffected()
 }
 
-// Prints Person's data from an array
-func PrintPersons(persons []person) {
-	for _, p := range persons {
-		fmt.Println(p.id, p.first_name, p.last_name)
+// Prints Car data from an array
+func PrintCars(cars []car) {
+	for _, c := range cars {
+		fmt.Println(c.id, c.manufacturer, c.model, c.product_year)
 	}
 }
 
 func main() {
-	dataSourceName := ".\\DataBase\\test.db"
+	dataSourceName := "cars.db"
 	InitDB(dataSourceName)
-	id, err := AddPerson("Danil", "Komarov")
+
+	//add demo
+	id, err := AddCar(3, "McLaren", "MP35M", 2021)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Added new Person: ")
-	PrintPersons([]person{SelectPersonById(id)})
-	fmt.Println("==========")
-	PrintPersons(SelectAllPersons())
-	count, err := UpdatePersonById(id, "Mikhail", "Dirin")
+	fmt.Println("Added new Car: ")
+	PrintCars([]car{SelectCarById(id)})
+
+	fmt.Println()
+
+	//select all demo
+	PrintCars(SelectAllCars())
+
+	fmt.Println()
+
+	//update demo
+	count, err := UpdateCarById(id, "Aston Martin", "AMR21", 2021)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print("Updated ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
-	count, err = DeletePersonById(id)
+	PrintCars(SelectAllCars())
+
+	fmt.Println()
+
+	//delete demo
+	count, err = DeleteCarById(id)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print("Deleted ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
+	PrintCars(SelectAllCars())
 }
