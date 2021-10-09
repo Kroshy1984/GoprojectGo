@@ -20,106 +20,107 @@ func InitDB(dataSourceName string) error {
 	return db.Ping()
 }
 
-// Adds Person by first and last name
+// Adds Product by first and last name
 // Returns pair <object_id, error>
-func AddPerson(firstName string, lastName string) (int64, error) {
-	result, err := db.Exec("insert into Persons (first_name, last_name) values ($1, $2)",
-		firstName, lastName)
+
+func AddProduct(product string, expiration_date string) (int64, error) {
+	result, err := db.Exec("insert into Products (product, expiration_date) values ($1, $2)",
+		product, expiration_date)
 	if err != nil {
 		panic(err)
 	}
 	return result.LastInsertId()
 }
 
-// Describes Person object
-type person struct {
-	id         int
-	first_name string
-	last_name  string
+// Describes Product object
+type product struct {
+	id              int
+	product         string
+	expiration_date string
 }
 
-// Select all Person objects from DB
-// Returns an array of Person
-func SelectAllPersons() []person {
-	rows, err := db.Query("select * from Persons")
+// Select all Product objects from DB
+// Returns an array of Product
+func SelectAllProducts() []product {
+	rows, err := db.Query("select * from Products")
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
-	persons := []person{}
-	// Parse rows into a Persons
+	products := []product{}
+	// Parse rows into a products
 	for rows.Next() {
-		p := person{}
-		err := rows.Scan(&p.id, &p.first_name, &p.last_name)
+		p := product{}
+		err := rows.Scan(&p.id, &p.product, &p.expiration_date)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		persons = append(persons, p)
+		products = append(products, p)
 	}
-	return persons
+	return products
 }
 
-// Select specified Person by id
-// Returns an Person object
-func SelectPersonById(id int64) person {
-	row := db.QueryRow("select * from Persons where id = $1", id)
-	p := person{}
-	err := row.Scan(&p.id, &p.first_name, &p.last_name)
+// Select specified Product by id
+// Returns an Product object
+func SelectProductById(id int64) product {
+	row := db.QueryRow("select * from Products where id = $1", id)
+	p := product{}
+	err := row.Scan(&p.id, &p.product, &p.expiration_date)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return p
 }
 
-// Updates Person with your id first and last name
+// Updates Product with your id first and last name
 // Returns pair <count of updated rows, error>
-func UpdatePersonById(id int64, first_name string, last_name string) (int64, error) {
-	result, err := db.Exec("update Persons set first_name = $1, last_name = $2 where id = $3", first_name, last_name, id)
+func UpdateProductById(id int64, product string, expiration_date string) (int64, error) {
+	result, err := db.Exec("update Products set product = $1, expiration_date = $2 where id = $3", product, expiration_date, id)
 	if err != nil {
 		panic(err)
 	}
 	return result.RowsAffected()
 }
 
-// Deletes Person by selected id
+// Deletes Product by selected id
 // Returns pair <count of deleted rows, error>
-func DeletePersonById(id int64) (int64, error) {
-	result, err := db.Exec("delete from Persons where id = $1", id)
+func DeleteProductById(id int64) (int64, error) {
+	result, err := db.Exec("delete from Products where id = $1", id)
 	if err != nil {
 		panic(err)
 	}
 	return result.RowsAffected()
 }
 
-// Prints Person's data from an array
-func PrintPersons(persons []person) {
-	for _, p := range persons {
-		fmt.Println(p.id, p.first_name, p.last_name)
+// Prints Product's data from an array
+func PrintProducts(products []product) {
+	for _, p := range products {
+		fmt.Println(p.id, p.product, p.expiration_date)
 	}
 }
 
 func main() {
 	dataSourceName := ".\\DataBase\\test.db"
 	InitDB(dataSourceName)
-	id, err := AddPerson("Danil", "Komarov")
+	id, err := AddProduct("Water", "2022-10-12")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Added new Person: ")
-	PrintPersons([]person{SelectPersonById(id)})
+	fmt.Println("Added new Product: ")
+	PrintProducts([]product{SelectProductById(id)})
 	fmt.Println("==========")
-	PrintPersons(SelectAllPersons())
-	count, err := UpdatePersonById(id, "Mikhail", "Dirin")
+	PrintProducts(SelectAllProducts())
+	count, err := UpdateProductById(id, "Orange", "2021-12-30")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print("Updated ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
-	count, err = DeletePersonById(id)
+	PrintProducts(SelectAllProducts())
+	count, err = DeleteProductById(id)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print("Deleted ", count, " rows\n")
-	PrintPersons(SelectAllPersons())
+	PrintProducts(SelectAllProducts())
 }
