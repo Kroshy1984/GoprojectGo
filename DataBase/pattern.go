@@ -4,8 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,9 +39,9 @@ func AddPerson(firstName string, lastName string) (int64, error) {
 
 // Describes Person object
 type person struct {
-	id         int
-	first_name string
-	last_name  string
+	Id         int
+	First_name string
+	Last_name  string
 }
 
 // Select all Person objects from DB
@@ -59,7 +63,7 @@ func SelectAllPersons(dbPath string, query string) ([]person, error) {
 	// Parse rows into a Persons
 	for rows.Next() {
 		p := person{}
-		err := rows.Scan(&p.id, &p.first_name, &p.last_name)
+		err := rows.Scan(&p.Id, &p.First_name, &p.Last_name)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -74,7 +78,7 @@ func SelectAllPersons(dbPath string, query string) ([]person, error) {
 func SelectPersonById(id int64) person {
 	row := db.QueryRow("select * from Persons where id = $1", id)
 	p := person{}
-	err := row.Scan(&p.id, &p.first_name, &p.last_name)
+	err := row.Scan(&p.Id, &p.First_name, &p.Last_name)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -104,20 +108,95 @@ func DeletePersonById(id int64) (int64, error) {
 // Prints Person's data from an array
 func PrintPersons(persons []person) {
 	for _, p := range persons {
-		fmt.Println(p.id, p.first_name, p.last_name)
+		if p.Id != 0 {
+			fmt.Print(p.Id)
+		}
+		fmt.Println(p.First_name, p.Last_name)
 	}
+}
+
+func Select(dbPath string, query string) ([]person, error) {
+
+	if strings.Contains(query, "drop") || strings.Contains(query, "delete") {
+		return []person{}, errors.New("cannot execute query")
+	}
+
+	db, err := sqlx.Connect("sqlite3", dbPath)
+
+	if err != nil {
+		fmt.Println(err)
+		return []person{}, err
+	}
+
+	persons := []person{}
+	er := db.Select(&persons, query)
+
+	if er != nil {
+		fmt.Println(err)
+		return []person{}, err
+	}
+
+	return persons, nil
+}
+
+func SelectFromFile(dbPath string, filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer file.Close()
+
+	result := ""
+
+	data := make([]byte, 64)
+	for {
+		n, err := file.Read(data)
+		if err == io.EOF { // если конец файла
+			break // выходим из цикла
+		}
+		result += string(data[:n])
+		/*
+			поскольку данные представляют срез байтов,
+			хотя файл *.txt хранит текстовую информацию,
+			то преобразуем срез байтов в строку:
+			string(data[:n])
+		*/
+	}
+	fmt.Print("query:\n" + result + "\n")
+	fmt.Print("result:\n")
+	p, err := Select(dbPath, result)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	PrintPersons(p)
 }
 
 func main() {
 	dataSourceName := "test.db"
 	InitDB(dataSourceName)
 
-	query := "select * from Persons"
-	// query := "drop table"
-	persons, error := SelectAllPersons(dataSourceName, query)
-	if error != nil {
-		fmt.Println(error)
+	query := "select First_name, Last_name from Persons order by id desc"
+	// // query := "drop table"
+	// persons, error := SelectAllPersons(dataSourceName, query)
+	// if error != nil {
+	// 	fmt.Println(error)
+	// 	return
+	// }
+	// PrintPersons(persons)
+
+	_, err := Select(dataSourceName, query)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	PrintPersons(persons)
+
+	//PrintPersons(p)
+
+	// reading from text file
+	queryPath := "test_query.txt"
+	SelectFromFile(dataSourceName, queryPath)
+
 }
